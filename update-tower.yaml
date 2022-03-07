@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: get all data
+      shell: awx project list --all -f yaml
+      register: output
+
+    - name: get project data
+      set_fact:
+        project: "{{ output.stdout_lines }}"
+
+    - name: print project id
+      debug:
+        msg: "{{ project }}"

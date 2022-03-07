@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: gathering facts and registing output
+      shell: awx projects list -f human --filter name
+      register: output
+     
+    - name: get scm_url
+      shell: awx projects get 9 -f yaml | grep -i scm_url | awk '{print($2)}'
+      register: scm_var
+
+    - name: debug
+      debug:
+        msg: "{{ scm_var.stdout }}"
+
+    - name: Get branches
+      shell: "git ls-remote {{ scm_var.stdout }}"
+      register: test
+
+    - name: debug
+      debug:
+        msg: "{{ test.stdout_lines }}"
+
+    - name: update project
+      shell: awx projects update 9 -f yaml
+      register: status1
+
+    - name: wait
+      shell: awx projects get 9 -f yaml | grep -i status | head -n +1
+      register: status1
+      until: status1.stdout.find('successful') != -1
+      retries: 10
+      delay: 10
+      ignore_errors: yes

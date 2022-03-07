@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+    - name: creating dummy inventory
+      tower_role:
+        team: "Paas Ops"
+        role: admin
+        state: present
+        #project: git-ansible
+        inventory: dummy

@@ -1,0 +1,79 @@
+---
+- hosts: localhost
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: gathering facts and registing output
+      shell: awx projects list -f human --filter name
+      register: output
+
+      #- name: variable set
+      #set_fact: 
+      # project: "{{ output.json.results[0].id }}"
+
+      #- name: display varaibe
+      #  debug:
+      # msg: "{{ project }}"
+    - name: checign statement
+      fail:
+        msg: project not found
+      when: '"{{ project_name }}" not in output.stdout'
+    - name: get project id
+      shell: awx projects list --name "{{ project_name }}" -f human --filter id | tail -n +3
+      register: project_id
+    
+    - name: debug the output
+      debug:
+        msg: "{{ project_id.stdout_lines | map('trim') | list }}"
+
+    - name: set fact
+      set_fact:
+         projects_id: "{{ project_id.stdout_lines | map('trim') | list }}"
+    
+    - name: debug the output
+      debug:
+        msg: "{{ project_id.stdout_lines | map('trim') | list }}"
+      register: id
+
+    - name: get scm url
+      shell: awx projects get "{{ id.msg[0] }}" -f yaml
+      register: project-test
+
+    - name: debug the output
+      debug:
+        msg: "{{ project-test }}"
+      register: ids
+
+      # - name: get scm url_new
+      #set_fact:
+      # project_scm: "{{ projectsss.scm_url }}"
+
+      #- name: debug the output
+      #debug:
+      # msg: "{{ project_scm.stdout }}"
+
+
+    - name: debug
+      debug:
+              msg: "{{ project-test.scm_url }}"
+
+    - name: get git remote branches
+      shell: "git ls-remote {{ project-test.scm_url }}"
+      register: output1
+
+      #- name: parse remote branches
+      #set_fact:
+              #remote_branches: "{{ output1 | get_remote_branches }}"
+
+      #- name: debug the output
+      #debug:
+      # msg: "{{ output1.stdout_lines }}"
+
+      # - name: fail when not in output
+      #fail:
+              #msg: development not found in repo
+        #when: '"main" not in output1.stdout'
+
+    - name: update project with branch
+      #shell: |
+              #awx projects modify --scm_url https://github.com/lostspy/system-hardening.git --scm_branch engineering

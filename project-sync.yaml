@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: project sync
+      shell: awx project update 9
+
+    - name: verify project sync
+      shell: awx project get 9 -f human --filter status | tail -n +3
+      register: output
+      until: output is successful
+      retries: 10
+      delay: 1
+    - name: debug output
+      debug:
+        msg: "{{ output.stdout_lines }}"

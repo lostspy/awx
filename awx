@@ -1,0 +1,3 @@
+awx schedules create --rrule "DTSTART:20170704T230000Z RRULE:FREQ=DAILY;INTERVAL=1" --name test-schedule --description test --unified_job_template "ID"
+
+awx job_templates create --name test-template --description "test" --job_type run --inventory "dummy" --project "git-ansible" --playbook "application-deployment/web_application/deploy.yml"

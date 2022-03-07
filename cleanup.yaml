@@ -1,0 +1,35 @@
+---
+- hosts: localhost
+  become: yes
+  gather_facts: false
+  vars:
+    object_type: "inventories"
+    #with_items:
+          #- "inventory"
+      #- "project"
+  tasks:
+    - name: "Get Tower object_type= ''{{ object_type }}'"
+      shell : "awx {{ object_type }} list --all -f human --filter 'id' | tail -n +3"
+      register: output
+
+    - name: "printing the output"
+      debug:
+        msg: "{{ output.stdout.split() }}"
+      register: output1
+
+    - name: register id's
+      set_fact:
+        object_ids: "{{ output.stdout.split() }}"
+        # with_items:
+        #- "{{ output1.stdout }} "
+        #when: output.stdout | int 
+      
+    - name: expose value
+      debug:
+        msg: "{{ object_ids }}"
+
+    - name: "Removing object_type='{{ object_type }}'"
+      shell: "awx {{ object_type }} delete {{ object_id }}"
+      with_items: "{{ object_ids }}"
+      loop_control:
+        loop_var: "object_id"
