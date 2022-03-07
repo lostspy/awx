@@ -5,7 +5,7 @@
   tasks:
     - name: creating dummy inventory
       tower_role:
-        team: "Paas Ops"
+        team: "test-team"
         role: admin
         state: present
         #project: git-ansible
